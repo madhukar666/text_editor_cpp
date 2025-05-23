@@ -1,13 +1,26 @@
 
+#include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
 
+
+/*To go from canonical mode to raw mode : program outputs the user input as he enters*/
+void enableRawMode(){
+
+    struct termios raw;
+
+    tcgetattr(STDIN_FILENO,&raw);
+    raw.c_lflag &= ~(ECHO);
+    tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw);
+
+}
 int main(){
 
+    enableRawMode();
+
     char c;
-    /* currently terminal is in canonical mode i.e., it reads the characters and only takes the read content after the
-    user clicks enter i mean it doesn't act the way text editors do
-    It stops reading after it encounyters the delimiter '~'*/
+
+    /* It stops reading after it encounyters the delimiter '~'*/
     while(read(STDIN_FILENO,&c,1) == 1 && c!='~');
     return 0;
 
