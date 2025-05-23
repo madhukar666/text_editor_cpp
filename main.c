@@ -1,16 +1,31 @@
-
+#include <ctype.h>
 #include <termios.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+struct termios orig_termios;
+
+void disableRawMode(){
+
+    tcsetattr(STDIN_FILENO,TCSAFLUSH,&orig_termios);
+}
 
 
 /*To go from canonical mode to raw mode : program outputs the user input as he enters*/
 void enableRawMode(){
 
-    struct termios raw;
+    
+    /*reads the attributes input to terminal to termios structure*/
+    tcgetattr(STDIN_FILENO,&orig_termios);
+    atexit(disableRawMode);
 
-    tcgetattr(STDIN_FILENO,&raw);
-    raw.c_lflag &= ~(ECHO);
+
+    struct termios raw = orig_termios;
+    raw.c_lflag &= ~(ECHO  |  ICANON); // ICANON  flag diables canonical mode
+
+
+    /* flushes the content stored in termios struct to the terminal as output*/
     tcsetattr(STDIN_FILENO,TCSAFLUSH,&raw);
 
 }
